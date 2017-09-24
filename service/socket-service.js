@@ -24,7 +24,7 @@ module.exports = function(socket) {
 
     socket.on('sendCandidate', (candidate) => {
         console.log('candidate: ' + candidate);
-        broadcastToOwnRoom(candidate, 'sendCandiate');
+        broadcastToOwnRoom(candidate, 'sendCandidate');
     });
 
     socket.on('sendAnswer', (answer) => {

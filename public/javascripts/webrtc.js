@@ -23,18 +23,15 @@ $(function(){
 
 
     $('#media_auth').on('click', function() {
-      navigator.mediaDevices.getUserMedia(mediaOption)
-      .then(function (stream) { // success
-          localStream = stream;
-          peerConnection.addStream(localStream);
-          trace('success add stream');
-      }).catch(function (error) { // error
-        console.error('mediaDevice.getUserMedia() error:', error);
-        return;
-      });
-    });
-
-    $('send_media').on('click', function() {
+        navigator.mediaDevices.getUserMedia(mediaOption)
+            .then(function (stream) { // success
+                localStream = stream;
+                peerConnection.addStream(localStream);
+                trace('success add stream');
+            }).catch(function (error) { // error
+                console.error('mediaDevice.getUserMedia() error:', error);
+                return;
+            });
     });
 
     /***** 受け取り処理 *****/
@@ -42,7 +39,6 @@ $(function(){
      * 通信相手からのofferを受け取りAnswerを返す
      */
     socket.on('sendOffer', function(offer) {
-        trace('get offer');
         if(!!peerConnection) {
             trace('received offer: ' + offer);
             peerConnection.setRemoteDescription(new RTCSessionDescription(offer), function(){}, errorHandler('Received Offer'));
@@ -51,7 +47,15 @@ $(function(){
     });
 
     socket.on('sendCandidate', function (candidate) {
+        trace('receive icecandidate: ' + candidate);
         peerConnection.addIceCandidate(new RTCIceCandidate(candidate), function(){}, errorHandler('Add Ice Candidate'));
+    });
+
+    socket.on('sendAnswer', function (answer) {
+        if(!!peerConnection) {
+            trace('received answer: ' + answer);
+            peerConnection.setRemoteDescription(new RTCSessionDescription(answer), function(){}, errorHandler('Received Answer'));
+        }
     });
 
     // ----- 後々切り出し webRTC
@@ -66,9 +70,9 @@ $(function(){
         // candidate取得時処理
         preparedConnection.onicecandidate = function (evt) {
             if (evt.candidate) {
+                trace('send candidate: ' + evt.candidate);
                 socket.emit('sendCandidate', evt.candidate)
             }
-            trace(evt.candidate);
         }
 
         // ネゴシエーションが必要なときに自動でofferを送信
@@ -85,9 +89,12 @@ $(function(){
 
     /***** ロジック系関数 *****/
     function playVideo(element, stream) {
+        trace('play video');
         if ('srcObject' in element) {
+            trace('src object');
             element.srcObject = stream;
         } else {
+            trace('src');
             element.src = window.URL.createObjectURL(stream);
         }
         element.play();
@@ -95,15 +102,14 @@ $(function(){
 
     function createOffer() {
         trace('called create Offer');
-        trace(peerConnection);
         if(!!peerConnection) {
             peerConnection.createOffer()
             .then(function (offer) {
-                trace(offer);
+                trace('create offer: ' + offer);
                 return peerConnection.setLocalDescription(new RTCSessionDescription(offer));
             })
             .then(function () {
-                trace('send offer');
+                trace('send offer' + peerConnection.localDescription);
                 socket.emit('sendOffer', peerConnection.localDescription);
             });
         }
@@ -111,14 +117,16 @@ $(function(){
 
     function createAnswer() {
         trace('called create Answer');
-        trace(peerConnection);
         if (!!peerConnection) {
             peerConnection.createAnswer()
             .then(function (answer) {
-                trace(answer);
-                // TODO set local description to other connection
-                socket.emit('sendAnswer', answer);
+                trace('create answer' + answer);
+                return peerConnection.setLocalDescription(new RTCSessionDescription(answer));
             })
+            .then(function () {
+                trace('send answer');
+                socket.emit('sendAnswer', peerConnection.localDescription);
+            });
         }
     }
 
