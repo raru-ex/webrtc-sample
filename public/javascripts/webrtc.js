@@ -6,27 +6,18 @@ $(function(){
     var servers = { 'iceServers': [{
         'urls':'stun:stun.l.google.com:19302'
     }]}
-    var peerConnection = prepareNewPeerConnection(servers);
+    var ownPeerConnection = prepareNewPeerConnection(servers);
 
-    socket.emit('init', {
+    socket.emit('join', {
         roomName: 'test',
         name: 'test' + Date.now()
     });
-
-    $('#submit').on('click', function() {
-        socket.emit('test', "hello");
-    });
-
-    socket.on('test', function(data) {
-        trace(data);
-    });
-
 
     $('#media_auth').on('click', function() {
         navigator.mediaDevices.getUserMedia(mediaOption)
             .then(function (stream) { // success
                 localStream = stream;
-                peerConnection.addStream(localStream);
+                ownPeerConnection.addStream(localStream);
                 trace('success add stream');
             }).catch(function (error) { // error
                 console.error('mediaDevice.getUserMedia() error:', error);
@@ -39,22 +30,22 @@ $(function(){
      * 通信相手からのofferを受け取りAnswerを返す
      */
     socket.on('sendOffer', function(offer) {
-        if(!!peerConnection) {
+        if(!!ownPeerConnection) {
             trace('received offer: ' + offer);
-            peerConnection.setRemoteDescription(new RTCSessionDescription(offer), function(){}, errorHandler('Received Offer'));
+            ownPeerConnection.setRemoteDescription(new RTCSessionDescription(offer), function(){}, errorHandler('Received Offer'));
             createAnswer();
         }
     });
 
     socket.on('sendCandidate', function (candidate) {
         trace('receive icecandidate: ' + candidate);
-        peerConnection.addIceCandidate(new RTCIceCandidate(candidate), function(){}, errorHandler('Add Ice Candidate'));
+        ownPeerConnection.addIceCandidate(new RTCIceCandidate(candidate), function(){}, errorHandler('Add Ice Candidate'));
     });
 
     socket.on('sendAnswer', function (answer) {
-        if(!!peerConnection) {
+        if(!!ownPeerConnection) {
             trace('received answer: ' + answer);
-            peerConnection.setRemoteDescription(new RTCSessionDescription(answer), function(){}, errorHandler('Received Answer'));
+            ownPeerConnection.setRemoteDescription(new RTCSessionDescription(answer), function(){}, errorHandler('Received Answer'));
         }
     });
 
@@ -102,30 +93,30 @@ $(function(){
 
     function createOffer() {
         trace('called create Offer');
-        if(!!peerConnection) {
-            peerConnection.createOffer()
+        if(!!ownPeerConnection) {
+            ownPeerConnection.createOffer()
             .then(function (offer) {
                 trace('create offer: ' + offer);
-                return peerConnection.setLocalDescription(new RTCSessionDescription(offer));
+                return ownPeerConnection.setLocalDescription(new RTCSessionDescription(offer));
             })
             .then(function () {
-                trace('send offer' + peerConnection.localDescription);
-                socket.emit('sendOffer', peerConnection.localDescription);
+                trace('send offer' + ownPeerConnection.localDescription);
+                socket.emit('sendOffer', ownPeerConnection.localDescription);
             });
         }
     }
 
     function createAnswer() {
         trace('called create Answer');
-        if (!!peerConnection) {
-            peerConnection.createAnswer()
+        if (!!ownPeerConnection) {
+            ownPeerConnection.createAnswer()
             .then(function (answer) {
                 trace('create answer' + answer);
-                return peerConnection.setLocalDescription(new RTCSessionDescription(answer));
+                return ownPeerConnection.setLocalDescription(new RTCSessionDescription(answer));
             })
             .then(function () {
                 trace('send answer');
-                socket.emit('sendAnswer', peerConnection.localDescription);
+                socket.emit('sendAnswer', ownPeerConnection.localDescription);
             });
         }
     }
