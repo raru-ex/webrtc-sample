@@ -1,17 +1,29 @@
 $(function(){
     var socket = io.connect("ws://"+ location.host);
-    var mediaOption = { video: true, audio:true };
-    var localStream;
-    var localVideo = document.getElementById('display_video');
     var servers = { 'iceServers': [{
         'urls':'stun:stun.l.google.com:19302'
-    }]}
-    var ownPeerConnection = prepareNewPeerConnection(servers);
+    }]};
+    var mediaOption,
+        ownPeerConnection,
+        localStream,
+        displayArea = document.getElementById('display_video');
 
-    socket.emit('join', {
-        roomName: 'test',
-        name: 'test' + Date.now()
-    });
+    /**
+     * システムに必要な初期化処理を行います。
+     */
+    function _init() {
+        mediaOption = {
+            video: true,
+            audio: true
+        }
+        ownPeerConnection = prepareNewPeerConnection(servers);
+        displayArea = document.getElementById('display_video');
+
+        socket.emit('join', {
+            roomName: 'test',
+            name: 'test' + Date.now()
+        });
+    }
 
     $('#media_auth').on('click', function() {
         navigator.mediaDevices.getUserMedia(mediaOption)
@@ -121,12 +133,18 @@ $(function(){
         }
     }
 
+    /**
+     * 簡易エラーコールバック用メソッド
+     */
     function errorHandler(context) {
         return function(error) {
             trace('Failure in ' + context + ': ' + error.toString);
         }
     }
 
+    /**
+     * ログ出力用メソッド
+     */
     function trace(arg) {
         var now = (window.performance.now() / 1000).toFixed(3);
         console.log(now + ': ', arg);

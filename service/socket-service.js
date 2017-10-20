@@ -1,10 +1,6 @@
 // chat 利用者
 var users = {};
 module.exports = function(socket) {
-    socket.on('test', function(data) {
-        console.log(data);
-        broadcastToOwnRoom(data, 'test');
-    });
 
     /**
      * room入室処理
