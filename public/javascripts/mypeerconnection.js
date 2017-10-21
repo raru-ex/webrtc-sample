@@ -16,6 +16,7 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         if(!(this instanceof raru.SocketIO.MyRTCPeerConnection)) {
             return new raru.SocketIO.MyRTCPeerConnection(socket, servers);
         }
+
         this.servers = servers || { 'iceServers': [{
             'urls':'stun:stun.l.google.com:19302'
         }]};
@@ -68,10 +69,12 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         /**
          * web socketにイベントを追加します。
          * @param String name イベント名
-         * @param Json param パラメータ
+         * @param Function callback パラメータ
          */
-        proto.addSocketEvent = function (name, param) {
-            self.socket.on(name, param);
+        proto.addSocketEvent = function (name, callback) {
+            self.socket.on(name, function (data) {
+                    callback(JSON.parse(data));
+                });
         }
 
         //########## private functions (privateにできなかった) ##########//
@@ -95,7 +98,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             // candidate取得時処理
             self.ownPeerConnection.onicecandidate = function (evt) {
                 if (evt.candidate) {
-                    self._emit('sendCandidate', evt.candidate);
+                    self._emit('sendCandidate', {
+                        candidate: evt.candidate
+                    });
                 }
             }
 
@@ -113,24 +118,24 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             /**
              * offerを受け取り、ansterを返す
              */
-            self.socket.on('sendOffer', function(offer) {
+            self.addSocketEvent('sendOffer', function(data) {
                 if(!!self.ownPeerConnection) {
-                    self._trace('received offer: ' + offer);
-                    self.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(offer))
+                    self._trace('received offer: ' + data.offer);
+                    self.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(data.offer))
                         .then(self._createAnswer)
                         .catch(self._defaultErrorHandler('Received Offer'));
                 }
             });
 
-            self.socket.on('sendCandidate', function (candidate) {
-                self._trace('receive icecandidate: ' + candidate);
-                self.ownPeerConnection.addIceCandidate(new RTCIceCandidate(candidate), self._defaultSuccessHandler, self._defaultErrorHandler('Add Ice Candidate'));
+            self.addSocketEvent('sendCandidate', function (data) {
+                self._trace('receive icecandidate: ' + data.candidate);
+                self.ownPeerConnection.addIceCandidate(new RTCIceCandidate(data.candidate), self._defaultSuccessHandler, self._defaultErrorHandler('Add Ice Candidate'));
             });
 
-            self.socket.on('sendAnswer', function (answer) {
+            self.addSocketEvent('sendAnswer', function (data) {
                 if(!!self.ownPeerConnection) {
-                    self._trace('received answer: ' + answer);
-                    self.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(answer), self._defaultSuccessHandler, self._defaultErrorHandler('Received Answer'));
+                    self._trace('received answer: ' + data.answer);
+                    self.ownPeerConnection.setRemoteDescription(new RTCSessionDescription(data.answer), self._defaultSuccessHandler, self._defaultErrorHandler('Received Answer'));
                 }
             });
         }
@@ -147,7 +152,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
                         return self.ownPeerConnection.setLocalDescription(new RTCSessionDescription(offer));
                     })
                     .then(function () {
-                        self._emit('sendOffer', self.ownPeerConnection.localDescription);
+                        self._emit('sendOffer', {
+                            offer: self.ownPeerConnection.localDescription
+                        });
                     })
                     .catch(self._defaultErrorHandler('create Offer'));
             }
@@ -165,7 +172,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
                         return self.ownPeerConnection.setLocalDescription(new RTCSessionDescription(answer));
                     })
                     .then(function () {
-                        self._emit('sendAnswer', self.ownPeerConnection.localDescription);
+                        self._emit('sendAnswer', {
+                            answer: self.ownPeerConnection.localDescription
+                        });
                     });
             }
         }
@@ -174,11 +183,11 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         /**
          * socketを利用してデータ送信を行う。
          * @param String name イベント名
-         * @param Json param 送信するパラメータ
+         * @param Array params 送信するパラメータの連想配列
          */
         proto._emit = function (name, param) {
             self._trace(name + ': ' + param);
-            self.socket.emit(name, param);
+            self.socket.emit(name, JSON.stringify(param));
         }
 
         /**
