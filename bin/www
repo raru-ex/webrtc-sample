@@ -8,6 +8,7 @@ var app = require('../app');
 var debug = require('debug')('webrtc:server');
 var http = require('http');
 var socketService = require('../service/socket-service');
+require('dotenv').config();
 
 /**
  * Get port from environment and store in Express.

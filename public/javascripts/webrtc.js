@@ -17,6 +17,21 @@ $(function(){
             });
     });
 
+    $('#change_media').on('click', function () {
+        navigator.mediaDevices.getUserMedia({
+            video: {
+                mandatory: {
+                    chromeMediaSource: 'desktop'
+                }
+            },
+            audio: true
+        })
+        .then(function (stream) {
+            localStream = stream;
+            ownPeerConnection.setLocalStream(localStream);
+        })
+    });
+
     /***** ロジック系関数 *****/
     function playVideo(evt) {
         var element = document.getElementById('display_video')
