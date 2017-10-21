@@ -10,6 +10,7 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
      */
     var MyRTCPeerConnection = function(socket, servers) {
         var _localStream;
+        // callback時などにthisが辛いため保持
         var self = this;
 
         if(!(this instanceof raru.SocketIO.MyRTCPeerConnection)) {
@@ -32,28 +33,48 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             self.ownPeerConnection.onicecandidate = callback;
         }
 
+        /**
+         * onnegotiationneededイベントの設定を行います。
+         * @param Function callback
+         */
         proto.setOnNegotiationneeded = function (callback) {
             self.ownPeerConnection.onicecandidate = callback;
         }
 
+        /**
+         * onaddstreamイベントの設定を行います。
+         * @param Function callback
+         */
         proto.setOnAddStream = function (callback) {
             self.ownPeerConnection.onaddstream = callback;
         }
 
+        /**
+         * local(自身)のstreamをセットします。
+         * @param MediaStream stream メディアのストリーム
+         */
         proto.setLocalStream = function (stream) {
             _localStream = stream;
             self.ownPeerConnection.addStream(_localStream);
         }
 
+        /**
+         * local(自身)のストリームをセットします。
+         */
         proto.getLocalStream = function () {
             return _localStream;
         }
 
-        proto.setSocketEvent = function (name, callback) {
-            self.socket.on(name, callback);
+        /**
+         * web socketにイベントを追加します。
+         * @param String name イベント名
+         * @param Json param パラメータ
+         */
+        proto.addSocketEvent = function (name, param) {
+            self.socket.on(name, param);
         }
 
-        //---------- private functions ----------//
+        //########## private functions (privateにできなかった) ##########//
 
         //---------- web rtc functions ---------//
 
@@ -67,6 +88,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             self._initSocketEvents();
         }
 
+        /**
+         * WebRTC系のイベントをデフォルトの処理で初期化
+         */
         proto._initWebRTCEvents = function () {
             // candidate取得時処理
             self.ownPeerConnection.onicecandidate = function (evt) {
@@ -82,6 +106,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             }
         }
 
+        /**
+         * Socket受け取り系イベントをデフォルト処理で初期化
+         */
         proto._initSocketEvents = function () {
             /**
              * offerを受け取り、ansterを返す
@@ -155,7 +182,7 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         }
 
         /**
-         * デフォルトのエラー制御
+         * デフォルトのエラー時コールバック
          * とりあえずエラーメッセージを表示
          */
         proto._defaultErrorHandler = function (context) {
@@ -164,6 +191,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             }
         }
 
+        /**
+         * デフォルトの処理成功コールバック
+         */
         proto._defaultSuccessHandler = function (context) {
             return function() {
                 self._trace(context + ' is success');
@@ -189,7 +219,5 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         this._init();
     }
 
-
     return MyRTCPeerConnection;
 })();
-
