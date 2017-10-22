@@ -3,7 +3,6 @@ $(function(){
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
     init();
 
-    /*
     $('#media_auth').on('click', function() {
         navigator.mediaDevices.getUserMedia({
             video: true,
@@ -17,7 +16,6 @@ $(function(){
                 return;
             });
     })
-    */;
 
     $('#change_media').on('click', getScreenMedia);
 
