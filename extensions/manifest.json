@@ -1,0 +1,30 @@
+{
+  "name": "raru desktop capture",
+  "description": "desktop capture extension",
+  "version": "0.1",
+  "manifest_version": 2,
+  "icons": {
+    "16": "icon16.png",
+    "48": "icon48.png",
+    "128": "icon128.png"
+  },
+  "background": {
+      "scripts": ["background.js"],
+      "persistent": false
+  },
+  "content_scripts": [ {
+      "js": [ "bridge.js" ],
+      "matches": [
+          "http://*/*",
+          "https://*/*"
+      ],
+      "all_frames": true,
+      "run_at": "document_end"
+  }],
+  "permissions": [
+    "desktopCapture",
+    "tabs"
+  ],
+  "browser_action": {
+  }
+}
