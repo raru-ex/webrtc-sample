@@ -17,11 +17,19 @@ module.exports = function(socket) {
     });
 
     /**
+     * 切断したユーザを削除する
+     */
+    socket.on('disconnect', function() {
+        delete users[socket.id];
+        console.log(users);
+    });
+
+    /**
      * room内のユーザにメディア送信offerを伝達
      */
     socket.on('sendOffer', (offer) => {
         console.log('offer: ' + offer);
-        broadcastToOwnRoom(offer, 'sendOffer');
+        broadcastToOwnRoom('sendOffer', offer);
     });
 
     /**
@@ -29,7 +37,7 @@ module.exports = function(socket) {
      */
     socket.on('sendCandidate', (candidate) => {
         console.log('candidate: ' + candidate);
-        broadcastToOwnRoom(candidate, 'sendCandidate');
+        broadcastToOwnRoom('sendCandidate', candidate);
     });
 
     /**
@@ -37,15 +45,15 @@ module.exports = function(socket) {
      */
     socket.on('sendAnswer', (answer) => {
         console.log('answer: ' + answer);
-        broadcastToOwnRoom(answer, 'sendAnswer');
+        broadcastToOwnRoom('sendAnswer', answer);
     });
 
     /**
      * 自身の入室しているroomで、自分以外のユーザへデータを送信する。
-     * @data {Object} 送信するデータ
      * @eventName {String} 対象となるイベントの名前
+     * @data {Object} 送信するデータ
      */
-    function broadcastToOwnRoom(data, eventName) {
+    function broadcastToOwnRoom(eventName, data) {
         console.log('data => ' + data)
         socket.broadcast.to(users[socket.id].room).emit(eventName, data);
     }
