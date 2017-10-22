@@ -1,7 +1,7 @@
 $(function(){
     var socket = getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
-    init('test' + Date.now(), 'testRoom');
+    init($('#name').text(), $('#room').text());
 
     $('#media_auth').on('click', getDeviceMedia({
         video: true,

@@ -2,8 +2,11 @@ extends layout
 
 block content
   div
-    button(id='submit' type='button') submit
-    button(id='media_auth' type='button') メディア
-    button(id='change_media' type='button') 動画切替
-  div(id='display')
-    video(id='display_video' autoplay)
+    form(method='POST', action='/room')
+      div
+        span 部屋名: 
+        input(type='text', name='roomName')
+      div
+        span 名前: 
+        input(type='text', name='name')
+      button(type='submit') 入室
