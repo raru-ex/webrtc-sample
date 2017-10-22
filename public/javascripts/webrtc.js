@@ -12,24 +12,28 @@ $(function(){
                 localStream = stream;
                 ownPeerConnection.setLocalStream(localStream);
             }).catch(function (error) { // error
-                console.error('mediaDevice.getUserMedia() error:', error);
+                console.log('mediaDevice.getUserMedia() error:', error);
                 return;
             });
     });
 
+    // TODO require chrome extension
     $('#change_media').on('click', function () {
         navigator.mediaDevices.getUserMedia({
             video: {
                 mandatory: {
                     chromeMediaSource: 'desktop'
                 }
-            },
-            audio: true
+            }
         })
         .then(function (stream) {
             localStream = stream;
             ownPeerConnection.setLocalStream(localStream);
         })
+        .catch(function(error) {
+            console.log('mediaDevice.getUserMedia() error:', error);
+            return;
+        });
     });
 
     /***** ロジック系関数 *****/
