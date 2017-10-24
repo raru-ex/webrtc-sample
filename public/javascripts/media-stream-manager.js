@@ -21,20 +21,65 @@ raru.Media.MediaStreamManager = (function () {
          * @return MediaStream
          */
         proto.getStream = function () {
-            return this.stream;
+            return self.stream;
+        }
+
+        /**
+         * カメラのストリームを返します。
+         * 音声がある場合には音声も一緒に返します。
+         * @return MediaStream カメラのStream
+         */
+        proto.getVideoStream = function () {
+            var videoTrack = self.getTrack('video');
+            var audioTrack = self.getTrack('audio');
+            var mediaStream = new MediaStream();
+
+            if(!!videoTrack) {
+                mediaStream.addTrack(videoTrack);
+            }
+            if(!!audioTrack) {
+                mediaStream.addTrack(audioTrack);
+            }
+
+            if(0 < mediaStream.getTracks().length) {
+                return mediaStream;
+            }
+
+            return null;
+        }
+
+        /**
+         * キャプチャのストリームを返します。
+         * 音声がある場合には音声も一緒に返します。
+         * @return MediaStream キャプチャのStream
+         */
+        proto.getScreenStream = function () {
+            var screenTrack = self.getTrack('screen');
+            var mediaStream = new MediaStream();
+
+            if(!!screenTrack) {
+                mediaStream.addTrack(screenTrack);
+            }
+
+            if(0 < mediaStream.getTracks().length) {
+                return mediaStream;
+            }
+
+            return null;
         }
 
         /**
          * 新たに取得したstreamを追加します。
          * すでにstreamが存在する場合には、重複していないトラックを追加します。
          * 同種のtrackが存在する場合には上書きを行います。
+         * * getUserMediaをすると新規IDの振られたTrackが取得されるのでIDまでは見なくていいと判断し見ていない
          * @param MediaStream
          */
         proto.addStream = function (stream) {
-            if(!Common.isInitialized(this.stream)) {
-                this.stream = stream;
+            if(!Common.isInitialized(self.stream)) {
+                self.stream = stream;
             } else {
-                stream.getTracks().forEach(addTrack);
+                stream.getTracks().forEach(self.addTrack);
             }
         }
 
@@ -44,16 +89,16 @@ raru.Media.MediaStreamManager = (function () {
          */
         proto.addTrack = function (track) {
             var hasSameTrack = false;
-            this.stream.getTracks().forEach(function (elem, index, array) {
-                if(this._getTrackTypeString(track) === this._getTrackTypeString(elem)) {
-                    this.stream.getTracks()[index] = track;
+            self.stream.getTracks().forEach(function (elem, index, array) {
+                if(self._getTrackTypeString(track) === self._getTrackTypeString(elem)) {
+                    self.stream.getTracks()[index] = track;
                     hasSameTrack = true;
                 }
             });
 
             // 存在しないタイプのTrackは追加
             if(!hasSameTrack) {
-                this.stream.addTrack(track);
+                self.stream.addTrack(track);
             }
         }
 
@@ -61,42 +106,58 @@ raru.Media.MediaStreamManager = (function () {
          * カメラの映像を停止します。
          */
         proto.stopVideo = function () {
-            this._stopStream('video');
+            self._stopStream('video');
         }
 
         /**
          * 音声を停止します。
          */
         proto.stopAudio = function () {
-            this._stopStream('audio');
+            self._stopStream('audio');
         }
 
         /**
          * デスクトップ共有を停止します。
          */
         proto.stopScreen = function () {
-            this._stopStream('sreen');
+            self._stopStream('sreen');
         }
 
         /**
          * カメラの映像を削除します。
          */
         proto.removeVideo = function () {
-            this._removeStream('video');
+            self._removeStream('video');
         }
 
         /**
          * 音声を削除します。
          */
         proto.removeAudio = function () {
-            this._removeStream('audio');
+            self._removeStream('audio');
         }
 
         /**
          * デスクトップ共有を削除します。
          */
         proto.removeScreen = function () {
-            this._removeStream('screen');
+            self._removeStream('screen');
+        }
+
+        /**
+         * 対象の種別のTrackを取得します。
+         * @param String type
+         * @return MediaStreamTrack 対象のタイプのTrack
+         * 対象のタイプが存在しない場合にはnull
+         */
+        proto.getTrack = function (type) {
+            var track = null;
+            self.stream.getTracks().forEach(function (elem, index, array) {
+                if (self._getTrackTypeString(elem) === type) {
+                    track = elem;
+                }
+            });
+            return track;
         }
 
         //----------- private methods ------------//
@@ -106,7 +167,7 @@ raru.Media.MediaStreamManager = (function () {
          * @return Bool 停止した場合にtrue
          */
         proto._stopStream = function (type) {
-            return this._executeFunctionToTargetTrack(type, function (elem) {
+            return self._executeFunctionToTargetTrack(type, function (elem) {
                 elem.stop();
             });
         }
@@ -117,7 +178,7 @@ raru.Media.MediaStreamManager = (function () {
          * @return Bool 削除した場合にtrue
          */
         proto._removeStream = function (type) {
-            return this._executeFunctionToTargetTrack(type, function (elem) {
+            return self._executeFunctionToTargetTrack(type, function (elem) {
                 self.stream.removeTrack(elem);
             });
         }
@@ -129,8 +190,8 @@ raru.Media.MediaStreamManager = (function () {
          * @return 同種のtrackに対して処理を実行した場合true
          */
         proto._executeFunctionToTargetTrack = function (type, callback) {
-            return this.stream.getTracks().forEach(function (elem, index, array) {
-                if(this._getTrackTypeString(elem) === type) {
+            return self.stream.getTracks().forEach(function (elem, index, array) {
+                if(self._getTrackTypeString(elem) === type) {
                     callback(elem);
                     return true;
                 }
@@ -172,11 +233,11 @@ raru.Media.MediaStreamManager = (function () {
          * @return String タイプ
          */
         proto._getTrackTypeString = function (track) {
-            if (this._isVideoTrack(track)) {
+            if (self._isVideoTrack(track)) {
                 return 'video';
-            } else if (this._isScreenTrack(track)) {
+            } else if (self._isScreenTrack(track)) {
                 return 'screen';
-            } else if (this._isAudioTrack(track)) {
+            } else if (self._isAudioTrack(track)) {
                 return 'audio';
             }
         }

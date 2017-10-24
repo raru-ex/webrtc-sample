@@ -1,6 +1,7 @@
 $(function(){
     var socket = getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
+    var mediaStreamManager = null;
     init($('#name').text(), $('#room').text());
 
     $('#media_auth').on('click', getDeviceMedia({
@@ -31,11 +32,15 @@ $(function(){
         return function () {
             navigator.mediaDevices.getUserMedia(option)
             .then(function (stream) {
-                localStream = stream;
+                if(mediaStreamManager == null ) {
+                    mediaStreamManager = new raru.Media.MediaStreamManager(stream);
+                } else {
+                    mediaStreamManager.addStream(stream);
+                }
                 console.log(stream);
                 console.log(stream.getVideoTracks());
                 console.log(stream.getTracks());
-                ownPeerConnection.setLocalStream(localStream);
+                ownPeerConnection.setLocalStream(mediaStreamManager.getStream());
             }).catch(function (error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
                 return;
@@ -65,11 +70,15 @@ $(function(){
                 }
             },
             function (stream) {
-                localStream = stream;
+                if(mediaStreamManager == null ) {
+                    mediaStreamManager = new raru.Media.MediaStreamManager(stream);
+                } else {
+                    mediaStreamManager.addStream(stream);
+                }
                 console.log(stream);
                 console.log(stream.getVideoTracks());
                 console.log(stream.getTracks());
-                ownPeerConnection.setLocalStream(localStream);
+                ownPeerConnection.setLocalStream(mediaStreamManager.getStream());
             },
             function(error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
@@ -85,11 +94,29 @@ $(function(){
      * メディアの再生を行う。
      */
     function playVideo(evt) {
-        var element = document.getElementById('display_video')
-        if ('srcObject' in element) {
-            element.srcObject = evt.stream;
+        if (mediaStreamManager == null ) {
+            mediaStreamManager = new raru.Media.MediaStreamManager(evt.stream);
         } else {
-            element.src = window.URL.createObjectURL(evt.stream);
+            mediaStreamManager.addStream(evt.stream);
+        }
+        var videoStream = mediaStreamManager.getVideoStream();
+        var screenStream = mediaStreamManager.getScreenStream();
+        var videoDisplay = document.getElementById('display_video')
+        var screenDisplay = document.getElementById('display_screen')
+        if ('srcObject' in videoDisplay) {
+            if (!!videoStream) {
+                videoDisplay.srcObject = videoStream;
+            }
+            if (!!screenStream) {
+                screenDisplay.srcObject = screenStream;
+            }
+        } else {
+            if (!!videoStream) {
+                videoDisplay.src = window.URL.createObjectURL(videoStream);
+            }
+            if (!!screenStream) {
+                screenDisplay.src = window.URL.createObjectURL(screenStream);
+            }
         }
     }
 
