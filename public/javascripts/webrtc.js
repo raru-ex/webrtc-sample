@@ -32,6 +32,9 @@ $(function(){
             navigator.mediaDevices.getUserMedia(option)
             .then(function (stream) {
                 localStream = stream;
+                console.log(stream);
+                console.log(stream.getVideoTracks());
+                console.log(stream.getTracks());
                 ownPeerConnection.setLocalStream(localStream);
             }).catch(function (error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
@@ -63,6 +66,9 @@ $(function(){
             },
             function (stream) {
                 localStream = stream;
+                console.log(stream);
+                console.log(stream.getVideoTracks());
+                console.log(stream.getTracks());
                 ownPeerConnection.setLocalStream(localStream);
             },
             function(error) {

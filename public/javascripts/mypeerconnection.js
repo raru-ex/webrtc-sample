@@ -9,9 +9,9 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
      * @param Array servers turn, stunサーバの設定
      */
     var MyRTCPeerConnection = function(socket, servers) {
-        var _localStream;
         // callback時などにthisが辛いため保持
         var self = this;
+        var _localStream = null;
 
         if(!(this instanceof raru.SocketIO.MyRTCPeerConnection)) {
             return new raru.SocketIO.MyRTCPeerConnection(socket, servers);
