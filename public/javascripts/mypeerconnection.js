@@ -11,7 +11,6 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
     var MyRTCPeerConnection = function(socket, servers) {
         // callback時などにthisが辛いため保持
         var self = this;
-        var _localStream = null;
 
         if(!(this instanceof raru.SocketIO.MyRTCPeerConnection)) {
             return new raru.SocketIO.MyRTCPeerConnection(socket, servers);
@@ -23,6 +22,8 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
 
         this.socket = socket;
         this.ownPeerConnection = new RTCPeerConnection(servers);
+        this.stream = null;
+
 
         var proto = MyRTCPeerConnection.prototype;
 
@@ -42,6 +43,10 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
             self.ownPeerConnection.onicecandidate = callback;
         }
 
+        proto.getConnection = function () {
+            return this.ownPeerConnection;
+        }
+
         /**
          * onaddstreamイベントの設定を行います。
          * @param Function callback
@@ -51,19 +56,36 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
         }
 
         /**
-         * local(自身)のstreamをセットします。
-         * @param MediaStream stream メディアのストリーム
+         * ontrackイベントの設定を行います。
+         * @param Function callback
          */
-        proto.setLocalStream = function (stream) {
-            _localStream = stream;
-            self.ownPeerConnection.addStream(_localStream);
+        proto.setOnTrack = function (callback) {
+            self.ownPeerConnection.ontrack = callback;
         }
 
         /**
-         * local(自身)のストリームをセットします。
+         * local(自身)のstreamをセットします。
+         * @param MediaStream stream メディアのストリーム
+         * @param Bool requestCreateOffer offerを送信する場合はtrue
+         */
+        proto.addStream = function (stream, requestCreateOffer = false) {
+            self.stream = stream;
+            self.ownPeerConnection.addStream(stream);
+            if (requestCreateOffer) {
+                self._createOffer();
+            }
+        }
+
+        proto.removeStream = function (stream) {
+           self.ownPeerConnection.removeStream(stream);
+        }
+
+
+        /**
+         * local(自身)のストリームを返します。
          */
         proto.getLocalStream = function () {
-            return _localStream;
+            return self.stream;
         }
 
         /**

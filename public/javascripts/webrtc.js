@@ -1,7 +1,9 @@
 $(function(){
     var socket = getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
-    var mediaStreamManager = null;
+    var remoteMediaStreamManager = null;
+    var manager = new raru.Media.MediaStreamManager(new MediaStream());
+
     init($('#name').text(), $('#room').text());
 
     $('#media_auth').on('click', getDeviceMedia({
@@ -32,15 +34,9 @@ $(function(){
         return function () {
             navigator.mediaDevices.getUserMedia(option)
             .then(function (stream) {
-                if(mediaStreamManager == null ) {
-                    mediaStreamManager = new raru.Media.MediaStreamManager(stream);
-                } else {
-                    mediaStreamManager.addStream(stream);
-                }
-                console.log(stream);
-                console.log(stream.getVideoTracks());
-                console.log(stream.getTracks());
-                ownPeerConnection.setLocalStream(mediaStreamManager.getStream());
+                console.log('set local video: ' + stream.getTracks());
+                //ownPeerConnection.addStream(stream);
+                manager.addStream(stream);
             }).catch(function (error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
                 return;
@@ -70,15 +66,10 @@ $(function(){
                 }
             },
             function (stream) {
-                if(mediaStreamManager == null ) {
-                    mediaStreamManager = new raru.Media.MediaStreamManager(stream);
-                } else {
-                    mediaStreamManager.addStream(stream);
-                }
-                console.log(stream);
-                console.log(stream.getVideoTracks());
-                console.log(stream.getTracks());
-                ownPeerConnection.setLocalStream(mediaStreamManager.getStream());
+                console.log('set local screen: ' + stream.getTracks());
+                manager.addStream(stream);
+                //ownPeerConnection.addStream(stream);
+                ownPeerConnection.addStream(manager.getStream());
             },
             function(error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
@@ -94,13 +85,9 @@ $(function(){
      * メディアの再生を行う。
      */
     function playVideo(evt) {
-        if (mediaStreamManager == null ) {
-            mediaStreamManager = new raru.Media.MediaStreamManager(evt.stream);
-        } else {
-            mediaStreamManager.addStream(evt.stream);
-        }
-        var videoStream = mediaStreamManager.getVideoStream();
-        var screenStream = mediaStreamManager.getScreenStream();
+        remoteMediaStreamManager = new raru.Media.MediaStreamManager(evt.stream);
+        var videoStream = remoteMediaStreamManager.getVideoStream();
+        var screenStream = remoteMediaStreamManager.getScreenStream();
         var videoDisplay = document.getElementById('display_video')
         var screenDisplay = document.getElementById('display_screen')
         if ('srcObject' in videoDisplay) {
@@ -125,9 +112,13 @@ $(function(){
      */
     function init(name, room) {
         ownPeerConnection.setOnAddStream(playVideo);
+        //ownPeerConnection.setOnTrack(playVideo);
         socket.emit('join', {
             name: name,
             roomName: room
         });
     }
+
+    $('#submit').on('click', function() {
+    });
 });
