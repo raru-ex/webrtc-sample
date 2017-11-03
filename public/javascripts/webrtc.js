@@ -37,7 +37,7 @@ $(function(){
                 console.log('set local video: ' + stream.getTracks());
                 //ownPeerConnection.addStream(stream);
                 manager.addStream(stream);
-                var test = manager.getStream();
+                // ownPeerConnection.addStream(manager.getStream());
             }).catch(function (error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
                 return;
@@ -69,7 +69,6 @@ $(function(){
             function (stream) {
                 console.log('set local screen: ' + stream.getTracks());
                 manager.addStream(stream);
-                //ownPeerConnection.addStream(stream);
                 ownPeerConnection.addStream(manager.getStream());
             },
             function(error) {
@@ -85,28 +84,10 @@ $(function(){
     /**
      * メディアの再生を行う。
      */
-    function playVideo(evt) {
-        if ('srcObject' in videoDisplay) {
-            if (!!videoStream) {
-                videoDisplay.srcObject = videoStream;
-            }
-            if (!!screenStream) {
-                screenDisplay.srcObject = screenStream;
-            }
-        } else {
-            if (!!videoStream) {
-                videoDisplay.src = window.URL.createObjectURL(videoStream);
-            }
-            if (!!screenStream) {
-                screenDisplay.src = window.URL.createObjectURL(screenStream);
-            }
-        }
-        // TODO デバッグ用
-        videoDisplay.srcObject = evt.stream;
-    }
 
     function requestStreamOwnerOption (evt) {
         remoteMediaStreamManager = new raru.Media.RemoteMediaStreamManager(evt.stream);
+
         console.log('request stream option');
         socket.emit('requestStreamOwnerOption', {
             socketId: socket.id,
@@ -136,9 +117,7 @@ $(function(){
      * 初期化
      */
     function init(name, room) {
-        // ownPeerConnection.setOnAddStream(playVideo);
         ownPeerConnection.setOnAddStream(requestStreamOwnerOption);
-        //ownPeerConnection.setOnTrack(playVideo);
         socket.emit('join', {
             name: name,
             roomName: room
