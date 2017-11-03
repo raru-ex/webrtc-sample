@@ -2,7 +2,7 @@ $(function(){
     var socket = getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
     var remoteMediaStreamManager = null;
-    var manager = new raru.Media.MediaStreamManager(new MediaStream());
+    var manager = new raru.Media.MediaStreamManager();
 
     init($('#name').text(), $('#room').text());
 
@@ -37,6 +37,7 @@ $(function(){
                 console.log('set local video: ' + stream.getTracks());
                 //ownPeerConnection.addStream(stream);
                 manager.addStream(stream);
+                var test = manager.getStream();
             }).catch(function (error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
                 return;
@@ -85,11 +86,6 @@ $(function(){
      * メディアの再生を行う。
      */
     function playVideo(evt) {
-        remoteMediaStreamManager = new raru.Media.MediaStreamManager(evt.stream);
-        var videoStream = remoteMediaStreamManager.getVideoStream();
-        var screenStream = remoteMediaStreamManager.getScreenStream();
-        var videoDisplay = document.getElementById('display_video')
-        var screenDisplay = document.getElementById('display_screen')
         if ('srcObject' in videoDisplay) {
             if (!!videoStream) {
                 videoDisplay.srcObject = videoStream;
@@ -105,13 +101,43 @@ $(function(){
                 screenDisplay.src = window.URL.createObjectURL(screenStream);
             }
         }
+        // TODO デバッグ用
+        videoDisplay.srcObject = evt.stream;
     }
+
+    function requestStreamOwnerOption (evt) {
+        remoteMediaStreamManager = new raru.Media.RemoteMediaStreamManager(evt.stream);
+        console.log('request stream option');
+        socket.emit('requestStreamOwnerOption', {
+            socketId: socket.id,
+            streamId: evt.stream.id
+        });
+    }
+
+    socket.on('requestStreamOwnerOption', function (data) {
+        console.log('socket on response stream option');
+        if(data.streamId === manager.getStream().id) {
+            socket.emit('responseStreamOwnerOption', manager.getOption());
+        }
+    })
+
+    socket.on('responseStreamOwnerOption', function (option) {
+        console.log('socket on response stream option');
+        remoteMediaStreamManager.extendOption(option);
+        var videoStream = remoteMediaStreamManager.getVideoStream();
+        var screenStream = remoteMediaStreamManager.getScreenStream();
+        var videoDisplay = document.getElementById('display_video');
+        var screenDisplay = document.getElementById('display_screen');
+        videoDisplay.srcObject = videoStream;
+        screenDisplay.srcObject = screenStream;
+    });
 
     /**
      * 初期化
      */
     function init(name, room) {
-        ownPeerConnection.setOnAddStream(playVideo);
+        // ownPeerConnection.setOnAddStream(playVideo);
+        ownPeerConnection.setOnAddStream(requestStreamOwnerOption);
         //ownPeerConnection.setOnTrack(playVideo);
         socket.emit('join', {
             name: name,

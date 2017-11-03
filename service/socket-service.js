@@ -48,6 +48,16 @@ module.exports = function(socket) {
         broadcastToOwnRoom('sendAnswer', answer);
     });
 
+    socket.on('requestStreamOwnerOption', (request) => {
+        console.log('request: ' + request);
+        broadcastToOwnRoom('requestStreamOwnerOption', request);
+    });
+
+    socket.on('responseStreamOwnerOption', (response) => {
+        console.log('response: ' + response);
+        broadcastToOwnRoom('responseStreamOwnerOption', response);
+    });
+
     /**
      * 自身の入室しているroomで、自分以外のユーザへデータを送信する。
      * @eventName {String} 対象となるイベントの名前

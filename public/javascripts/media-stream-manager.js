@@ -10,16 +10,13 @@ raru.Media.MediaStreamManager = (function () {
      * @param Json option video, audio, screenの有無 (省略可能)
      * {
      *   audio {
-     *     contains: true,
      *     id: '123-333-2222'
      *   },
      *   video: {
-     *     contains: true,
      *     id: '882-313-112'
-     *   },
+     *   }
      *   screen: {
-     *     contains: false,
-     *     id: null
+     *     id: '291-129-282'
      *   }
      * }
      */
@@ -32,7 +29,7 @@ raru.Media.MediaStreamManager = (function () {
         this.AUDIO = 1;
         this.VIDEO = 2;
         this.SCREEN = 3;
-
+        this.isRemote = false;
 
         //---------- public functions ----------//
         var proto = MediaStreamManager.prototype;
@@ -100,6 +97,10 @@ raru.Media.MediaStreamManager = (function () {
          * @param Json option constructorと同じ
          */
         proto.addStream = function (stream) {
+            if (!Common.isInitialized(stream)) {
+                return;
+            }
+
             console.log('add stream: ' + stream);
             if(!Common.isInitialized(self.stream)) {
                 self.stream = new MediaStrem();
@@ -131,7 +132,7 @@ raru.Media.MediaStreamManager = (function () {
                 self.stream.addTrack(track);
                 console.log('add track: ' + track)
             }
-
+            console.log(track);
             // 追加にしろ変更にしろidを更新
             self._setTrackId(track);
         }
@@ -204,23 +205,45 @@ raru.Media.MediaStreamManager = (function () {
             return track;
         }
 
-        //----------- private methods ------------//
+        proto.getOption = function () {
+            var option = {};
+            if(!!self.videoTrackId) {
+                option.video = {
+                    id: self.videoTrackId
+                }
+            }
+            if(!!self.screenTrackId) {
+                option.screen = {
+                    id: self.screenTrackId
+                }
+            }
+            if(!!self.audioTrackId) {
+                option.audio = {
+                    id: self.audioTrackId
+                }
+            }
+            return option;
+        }
 
         /**
          * optionを反映します。
          * @param Json option コンストラクタのoptionと同様
          */
-        proto._extendOption = function (option) {
+        proto.extendOption = function (option) {
             if (Common.isInitialized(option)) {
-                if (option.audio.contains && !!option.audio.id) {
+                if (!!option.audio) {
                     self.audioTrackId = option.audio.id;
-                } else if (option.video.contains && !!option.video.id) {
+                }
+                if (!!option.video) {
                     self.videoTrackId = option.video.id;
-                } else if (option.screen.contains && !!option.screen.id) {
+                }
+                if (!!option.screen) {
                     self.screenTrackId = option.screen.id;
                 }
             }
         }
+        //----------- private methods ------------//
+
 
         /**
          * 対象のstreamを停止します。
@@ -278,7 +301,10 @@ raru.Media.MediaStreamManager = (function () {
          * @return Bool キャプチャ以外の動画の場合true
          */
         proto._isVideoTrack = function (track) {
-            return track.id === self.videoTrackId || (track.kind === 'video' && -1 === track.label.indexOf('screen'));
+            if (self.isRemote) {
+                return track.id === self.videoTrackId;
+            }
+            return track.kind === 'video' && -1 === track.label.indexOf('screen');
         }
 
         /**
@@ -287,7 +313,10 @@ raru.Media.MediaStreamManager = (function () {
          * @return Bool スクリーンキャプチャの場合true
          */
         proto._isScreenTrack = function (track) {
-            return track.id === self.screenTrackId || (track.kind === 'video' && -1 < track.label.indexOf('screen'));
+            if (self.isRemote) {
+                return track.id === self.screenTrackId;
+            }
+            return track.kind === 'video' && -1 < track.label.indexOf('screen');
         }
 
         /**
@@ -296,7 +325,10 @@ raru.Media.MediaStreamManager = (function () {
          * @return Bool 音声の場合true
          */
         proto._isAudioTrack = function (track) {
-            return track.id === self.audioTrackId || (track.kind === 'audio');
+            if (self.isRemote) {
+                return track.id === self.audioTrackId;
+            }
+            return track.kind === 'audio';
         }
 
         /**
@@ -314,10 +346,19 @@ raru.Media.MediaStreamManager = (function () {
             }
         }
 
-        proto._init = function (stream, option) {
-            self._extendOption(option);
-            self.stream = new MediaStream();
-            self.addStream(stream);
+        /**
+         * オブジェクトを初期化します
+         * @param MediaStream stream セットするストリーム
+         * @param Json option コンストラクタと同様
+         */
+        proto._init = function (inputStream, option) {
+            self.extendOption(option);
+            if(Common.isInitialized(inputStream)) {
+                self.stream = inputStream;
+            } else {
+                self.stream = new MediaStream();
+                self.addStream(inputStream);
+            }
         }
 
         self._init(stream, option);
@@ -326,3 +367,23 @@ raru.Media.MediaStreamManager = (function () {
     return MediaStreamManager;
 })();
 
+raru.Media.RemoteMediaStreamManager = (function() {
+    var RemoteMediaStreamManager = {};
+
+    RemoteMediaStreamManager = function (stream, option) {
+        raru.Media.MediaStreamManager.call(this, stream, option);
+        this.isRemote = true;
+    }
+
+
+    RemoteMediaStreamManager.prototype = Object.create(raru.Media.MediaStreamManager.prototype, {
+        constructor: {
+            configurable: true,
+            enumerable: true,
+            writable: true,
+            value: RemoteMediaStreamManager
+        }
+    });
+
+    return RemoteMediaStreamManager;
+})();
