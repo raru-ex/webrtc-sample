@@ -209,6 +209,10 @@ raru.Media.MediaStreamManager = (function () {
             return track;
         }
 
+        /**
+         * 現在streamに登録されている状態をコンストラクタ引数のoption形式で返します。
+         * @return Object option コンストラクタ引数
+         */
         proto.getOption = function () {
             var option = {};
             if(!!self.videoTrackId) {
@@ -288,6 +292,9 @@ raru.Media.MediaStreamManager = (function () {
             return false;
         }
 
+        /**
+         * trackに合わせてidをセットします。
+         */
         proto._setTrackId = function (track) {
             var type = self._getTrackType(track);
             if(type === self.AUDIO) {
@@ -371,15 +378,25 @@ raru.Media.MediaStreamManager = (function () {
     return MediaStreamManager;
 })();
 
+/**
+ * RemoteのStreamを管理する用のクラス
+ */
 raru.Media.RemoteMediaStreamManager = (function() {
     var RemoteMediaStreamManager = {};
 
+    /**
+     * コンストラクタ
+     * isRemoteをtrueにセットする以外は全てMediaStreamManagerと同じです。
+     */
     RemoteMediaStreamManager = function (stream, option) {
         raru.Media.MediaStreamManager.call(this, stream, option);
         this.isRemote = true;
     }
 
 
+    /**
+     * MediaStreamManagerのプロトタイプを継承します。
+     */
     RemoteMediaStreamManager.prototype = Object.create(raru.Media.MediaStreamManager.prototype, {
         constructor: {
             configurable: true,
