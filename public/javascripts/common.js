@@ -1,6 +1,7 @@
 var raru = raru || {};
 raru.Common = {
 
+
     isInitialized: function (target) {
         return typeof target !== "undefined";
     },
@@ -12,13 +13,19 @@ raru.Common = {
             if ('https:' == document.location.protocol) {
                 prefix = 'wss';
             }
-            return io.connect(prefix + '://' + location.host);
+            var url = prefix + '://' + location.host;
+            if(!raru.Common.sockets[url]) {
+                raru.Common.sockets[url] = io.connect(url);
+            }
+            return raru.Common.sockets[url];
         }
         return null;
     },
 
     splitByLine: function (str) {
         return str.split(/\r\n|\r|\n/);
-    }
+    },
+
+    sockets: []
 };
 

@@ -74,14 +74,14 @@ $(function(){
                 ownPeerConnection.addStream(manager.getStream());
         var videoStream = manager.getVideoStream();
         var screenStream = manager.getScreenStream();
-        var ownVideoDisplay = document.getElementById('ownVideoDisplay');
-        var ownScreenDisplay = document.getElementById('ownScreenDisplay');
+        var ownVideoDisplay = document.getElementById('ownMainDisplay');
+        var ownScreenDisplay = document.getElementById('ownSubDisplay');
         ownVideoDisplay.srcObject = videoStream;
         ownScreenDisplay.srcObject = screenStream;
 
         //TODO とりあえず
-        $('#ownVideoDisplay').removeClass('d-none');
-        $('#ownScreenDisplay').removeClass('d-none');
+        $('#ownMainDisplay').removeClass('d-none');
+        $('#ownSubDisplay').removeClass('d-none');
             },
             function(error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
@@ -119,14 +119,14 @@ $(function(){
         remoteMediaStreamManager.extendOption(option);
         var videoStream = remoteMediaStreamManager.getVideoStream();
         var screenStream = remoteMediaStreamManager.getScreenStream();
-        var videoDisplay = document.getElementById('videoDisplay');
-        var screenDisplay = document.getElementById('screenDisplay');
+        var videoDisplay = document.getElementById('subDisplay');
+        var screenDisplay = document.getElementById('mainDisplay');
         videoDisplay.srcObject = videoStream;
         screenDisplay.srcObject = screenStream;
 
         //TODO とりあえず
-        $('#videoDisplay').removeClass('d-none');
-        $('#screenDisplay').removeClass('d-none');
+        $('#subDisplay').removeClass('d-none');
+        $('#mainDisplay').removeClass('d-none');
     });
 
     /**

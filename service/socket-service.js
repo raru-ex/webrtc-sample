@@ -1,5 +1,5 @@
 // chat 利用者
-var users = [];
+var users = {};
 module.exports = function(socket) {
 
     /**
@@ -76,7 +76,7 @@ module.exports = function(socket) {
      * @data {Object} 送信するデータ
      */
     function broadcastToOwnRoom(eventName, data) {
-        console.log('data => ' + data)
+        console.log('socket: ' + socket.id + '; data => ' + data)
         socket.broadcast.to(users[socket.id].room).emit(eventName, data);
     }
 }
