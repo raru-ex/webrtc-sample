@@ -114,13 +114,22 @@ body {
 }
 
 .remoteMain {
-    z-index: 2;
+    z-index: 0;
     width: 100%;
 }
 
 .remoteSub {
     z-index: 1;
-    width: 15%;
+    width: 120px;
     position: absolute;
     top: 0;
     right: 0;
+}
+
+.ownMain {
+    width: 100%;
+}
+
+.ownSub {
+    width: 100%;
+}

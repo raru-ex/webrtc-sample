@@ -71,6 +71,16 @@ $(function(){
                 console.log('set local screen: ' + stream.getTracks());
                 manager.addStream(stream);
                 ownPeerConnection.addStream(manager.getStream());
+        var videoStream = manager.getVideoStream();
+        var screenStream = manager.getScreenStream();
+        var ownVideoDisplay = document.getElementById('ownVideoDisplay');
+        var ownScreenDisplay = document.getElementById('ownScreenDisplay');
+        ownVideoDisplay.srcObject = videoStream;
+        ownScreenDisplay.srcObject = screenStream;
+
+        //TODO とりあえず
+        $('#ownVideoDisplay').removeClass('d-none');
+        $('#ownScreenDisplay').removeClass('d-none');
             },
             function(error) {
                 console.log('mediaDevice.getUserMedia() error:', error);

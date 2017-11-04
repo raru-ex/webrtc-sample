@@ -33,6 +33,10 @@ block content
                 i(class='fa fa-video-camera fa-lg', aria-hidden='true')
               button(id='voiceCall', class='pointer btn btn-default btn-circle ml-2')
                 i(class='fa fa-phone fa-lg', aria-hidden='true')
+        div(class='display')
+          video(id='ownVideoDisplay', class='ownMain d-none', autoplay)
+          video(id='ownScreenDisplay', class='ownSub d-none', autoplay)
+
     div(id='chatArea', class='chat-container')
       div(class='header')
         span(class='ml-2') Messages
@@ -41,7 +45,7 @@ block content
           li(class='message')
             div(class='message-body')
               div(class='chat-header')
-                span(class='name font-weight-bold') 藪崎
+                span(class='name font-weight-bold') テスト太郎
                 small(class='text-muted pull-right')
                   span(class='posted-time') 11月04日 12:32
               p ほげほげ
