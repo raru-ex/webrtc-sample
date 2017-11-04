@@ -1,12 +1,14 @@
 extends layout
 
+block stylesheet
+  link(rel='stylesheet', href='/stylesheets/signin.css')
+
 block content
-  div
-    form(method='POST', action='/room')
-      div
-        span 部屋名: 
-        input(type='text', name='roomName')
-      div
-        span 名前: 
-        input(type='text', name='name')
-      button(type='submit') 入室
+  div(class='container')
+    form(method='POST', action='/room', class='form-signin')
+      h2(class='form-signin-heading') ルーム選択
+      label(for='roomName', class='sr-only') 部屋名
+      input(id='roomName', class='form-control', type='text', name='roomName', placeholder='部屋名')
+      label(for='name', class='sr-only') 名前
+      input(id='name', class='form-control', type='text', name='name', placeholder='名前')
+      button(class='btn btn-lg btn-primary btn-block', type='submit') 入室
