@@ -4,47 +4,38 @@ $(function(){
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
     var remoteMediaStreamManager = null;
     var manager = new raru.Media.MediaStreamManager();
+    var $videoCaller = $('#videoCall');
+    var $voiceCaller = $('#voiceCall');
+    var $screenCaller = $('#screenCall');
 
     init();
-
-    $('#videoCall').on('click', getDeviceMedia({
-        video: true,
-        audio: true
-    }));
-
-    //TODO 間違ってる。一旦テストに
-    $('#voiceCall').on('click', getScreenMedia);
+    $videoCaller.on('click', handleVideoCaller);
+    $voiceCaller.on('click', handleVoiceCaller);
+    $screenCaller.on('click', handleScreenCaller);
 
     /***** ロジック系関数 *****/
-
-    /**
-     * http, httpsに適切なsocketを作成して返す
-     */
-    function getSocket() {
-        var prefix = 'ws';
-        if ("https:" == document.location.protocol) {
-            var prefix = 'wss';
-        }
-        return io.connect(prefix + '://' + location.host);
-    }
 
     /**
      * デバイスからのメディア(カメラ, マイク)を取得しstreamの流し込みを行う。
      * @param Object option vide, audioの有無オプション
      */
     function getDeviceMedia(option) {
-        return function () {
-            navigator.mediaDevices.getUserMedia(option)
-            .then(function (stream) {
-                console.log('set local video: ' + stream.getTracks());
-                //ownPeerConnection.addStream(stream);
-                manager.addStream(stream);
-                // ownPeerConnection.addStream(manager.getStream());
-            }).catch(function (error) {
-                console.log('mediaDevice.getUserMedia() error:', error);
-                return;
-            });
-        };
+        navigator.mediaDevices.getUserMedia(option)
+        .then(function (stream) {
+            console.log('set local video: ' + stream.getTracks());
+            if (option.video) {
+                activateIcon($videoCaller);
+                activateIcon($voiceCaller);
+            } else {
+                activateIcon($voiceCaller);
+            }
+            //ownPeerConnection.addStream(stream);
+            manager.addStream(stream);
+            // ownPeerConnection.addStream(manager.getStream());
+        }).catch(function (error) {
+            console.log('mediaDevice.getUserMedia() error:', error);
+            return;
+        });
     }
 
     /**
@@ -128,6 +119,44 @@ $(function(){
         $('#subDisplay').removeClass('d-none');
         $('#mainDisplay').removeClass('d-none');
     });
+
+
+    function handleVideoCaller() {
+        if(!isActiveIcon($videoCaller)) {
+            getDeviceMedia({
+                video: true,
+                audio: true
+            });
+        } else {
+            // TODO stop video track
+        }
+    }
+
+    function handleVoiceCaller() {
+        if(!isActiveIcon($voiceCaller)) {
+            getDeviceMedia({
+                video: false,
+                audio: true
+            });
+        } else {
+            // TODO remote stream
+        }
+    }
+
+    function handleScreenCaller() {
+        getScreenMedia();
+    }
+
+    function activateIcon ($button) {
+        var $target = $button.find('i');
+        if (!$target.hasClass('active')) {
+            $target.addClass('active');
+        }
+    }
+
+    function isActiveIcon($button) {
+        return $button.find('i').hasClass('active');
+    }
 
     /**
      * 初期化

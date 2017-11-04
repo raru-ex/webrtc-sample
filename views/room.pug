@@ -29,7 +29,11 @@ block content
           div(class='card-header')
             span(id='userName', class='glyphicon glyphicon-comment') #{name}
             div(class='pull-right')
-              button(id='videoCall', class='pointer btn btn-default btn-circle')
+              button(id='microphone', class='pointer btn btn-default btn-circle')
+                i(class='fa fa-microphone fa-lg', aria-hidden='true')
+              button(id='screenCall', class='pointer btn btn-default btn-circle ml-2')
+                i(class='fa fa-desktop fa-lg', aria-hidden='true')
+              button(id='videoCall', class='pointer btn btn-default btn-circle ml-2')
                 i(class='fa fa-video-camera fa-lg', aria-hidden='true')
               button(id='voiceCall', class='pointer btn btn-default btn-circle ml-2')
                 i(class='fa fa-phone fa-lg', aria-hidden='true')

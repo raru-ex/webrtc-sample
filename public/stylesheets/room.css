@@ -7,6 +7,10 @@ body {
     color: #008b8b;
 }
 
+.card-header i.active {
+    color: red;
+}
+
 .glyphicon {
     position: relative;
     top: 1px;
