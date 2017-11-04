@@ -1,0 +1,126 @@
+body {
+    padding-top: 5rem;
+    background-color: #f2f2f2;
+}
+.card-header i {
+    color: #008b8b;
+}
+
+.glyphicon {
+    position: relative;
+    top: 1px;
+    display: inline-block;
+    font-style: normal;
+    font-weight: 600;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.glyphicon-comment:before {
+    content: '\f27b';
+    font-family: FontAwesome;
+    margin-right: 5px;
+}
+
+#chatArea .header {
+    margin-top: 15px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    margin-bottom: 5px;
+    background-color: #563d7c;
+    color: white;
+}
+
+.text {
+    background-color:white;
+}
+
+.chat-container {
+    width: 100%;
+    background-color: white;
+}
+
+.chat {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.chat li {
+    margin-bottom: 10px;
+    padding-bottom: 5px;
+    border-bottom: 1px dotted #B3A9A9;
+}
+
+.message p {
+    font-size: 0.9rem;
+    margin: 0;
+}
+
+.chat .posted-time:before {
+    content: '\f017';
+    font-family: FontAwesome;
+    margin-right: 2px;
+}
+
+.chat-input .input-header {
+    border: 1px solid #b3b3b3 !important;
+    border-bottom: 0 !important;
+    padding: 5px;
+    box-sizing: content-box;
+    height: 30px;
+}
+
+.chat-input textarea {
+    height: 100px;
+    background-color: #fffde3;
+    border-radius: 0;
+    border: 1px solid #b3b3b3 !important;
+    box-shadow: none;
+    box-sizing: border-box;
+    width: 100%;
+    outline: 0;
+    margin: 0;
+    padding: 5px;
+    border: 0;
+    overflow-y: hidden;
+    min-height: 50px;
+    font-size: 14px;
+    resize: none;
+}
+
+.pointer {
+    cursor: pointer;
+}
+.btn-circle {
+    background-color: white;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    padding: 6px 0;
+    font-size: 12px;
+    line-height: 1.428571429;
+    border-radius: 15px;
+}
+
+.btn-circle:hover {
+    background-color: #ddd;
+}
+
+.display {
+    position: relative;
+    width: 100%;
+}
+
+.remoteMain {
+    z-index: 2;
+    width: 100%;
+}
+
+.remoteSub {
+    z-index: 1;
+    width: 15%;
+    position: absolute;
+    top: 0;
+    right: 0;

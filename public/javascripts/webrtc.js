@@ -6,12 +6,13 @@ $(function(){
 
     init($('#name').text(), $('#room').text());
 
-    $('#media_auth').on('click', getDeviceMedia({
+    $('#videoCall').on('click', getDeviceMedia({
         video: true,
         audio: true
     }));
 
-    $('#change_media').on('click', getScreenMedia);
+    //TODO 間違ってる。一旦テストに
+    $('#voiceCall').on('click', getScreenMedia);
 
     /***** ロジック系関数 *****/
 
@@ -107,10 +108,14 @@ $(function(){
         remoteMediaStreamManager.extendOption(option);
         var videoStream = remoteMediaStreamManager.getVideoStream();
         var screenStream = remoteMediaStreamManager.getScreenStream();
-        var videoDisplay = document.getElementById('display_video');
-        var screenDisplay = document.getElementById('display_screen');
+        var videoDisplay = document.getElementById('videoDisplay');
+        var screenDisplay = document.getElementById('screenDisplay');
         videoDisplay.srcObject = videoStream;
         screenDisplay.srcObject = screenStream;
+
+        //TODO とりあえず
+        $('#videoDisplay').removeClass('d-none');
+        $('#screenDisplay').removeClass('d-none');
     });
 
     /**
