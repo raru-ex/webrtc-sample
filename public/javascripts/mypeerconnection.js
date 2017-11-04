@@ -22,7 +22,6 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
 
         this.socket = socket;
         this.ownPeerConnection = new RTCPeerConnection(servers);
-        this.stream = null;
 
 
         var proto = MyRTCPeerConnection.prototype;
@@ -69,7 +68,6 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
          * @param Bool requestCreateOffer offerを送信する場合はtrue
          */
         proto.addStream = function (stream, requestCreateOffer = false) {
-            self.stream = stream;
             self.ownPeerConnection.addStream(stream);
             if (requestCreateOffer) {
                 self._createOffer();
@@ -80,13 +78,6 @@ raru.SocketIO.MyRTCPeerConnection = (function() {
            self.ownPeerConnection.removeStream(stream);
         }
 
-
-        /**
-         * local(自身)のストリームを返します。
-         */
-        proto.getLocalStream = function () {
-            return self.stream;
-        }
 
         /**
          * web socketにイベントを追加します。
