@@ -3,7 +3,11 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "node ./bin/www"
+    "start": "node ./bin/www",
+    "css": "npm-run-all css-compile css-prefix css-minify",
+    "css-compile": "node-sass --output-style expanded --source-map true --source-map-contents true --precision 6 src/custom.scss dist/css/custom.css",
+    "css-prefix": "postcss --config node_modules/bootstrap/build/postcss.config.js --replace dist/css/*.css",
+    "css-minify": "cleancss --level 1 --source-map --source-map-inline-sources --output public/stylesheets/bootstrap4.min.css dist/css/custom.css"
   },
   "dependencies": {
     "body-parser": "~1.17.1",
@@ -13,5 +17,8 @@
     "morgan": "~1.8.1",
     "pug": "~2.0.0-beta11",
     "serve-favicon": "~2.4.2"
+  },
+  "devDependencies": {
+    "bootstrap": "^4.0.0-beta.2"
   }
 }
