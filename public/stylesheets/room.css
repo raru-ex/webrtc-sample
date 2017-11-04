@@ -143,3 +143,8 @@ body {
 .ownSub {
     width: 100%;
 }
+
+.soundonly {
+    background-image: url('/images/soundonly.png');
+    background-size: cover;
+}

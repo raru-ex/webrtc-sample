@@ -7,6 +7,10 @@ $(function(){
     var $videoCaller = $('#videoCall');
     var $voiceCaller = $('#voiceCall');
     var $screenCaller = $('#screenCall');
+    var $ownMainDisplay = $('#ownMainDisplay');
+    var $ownSubDisplay = $('#ownSubDisplay');
+    var $remoteMainDisplay = $('#remoteMainDisplay');
+    var $remoteSubDisplay = $('#remoteSubDisplay');
 
     init();
     $videoCaller.on('click', handleVideoCaller);
@@ -23,15 +27,17 @@ $(function(){
         navigator.mediaDevices.getUserMedia(option)
         .then(function (stream) {
             console.log('set local video: ' + stream.getTracks());
+            $ownMainDisplay[0].srcObject = stream;
+            manager.addStream(stream);
+            ownPeerConnection.addStream(manager.getStream());
             if (option.video) {
                 activateIcon($videoCaller);
-                activateIcon($voiceCaller);
+                $ownMainDisplay.removeClass('soundonly');
             } else {
-                activateIcon($voiceCaller);
+                $ownMainDisplay.addClass('soundonly');
             }
-            //ownPeerConnection.addStream(stream);
-            manager.addStream(stream);
-            // ownPeerConnection.addStream(manager.getStream());
+            activateIcon($voiceCaller);
+            $ownMainDisplay.removeClass('d-none');
         }).catch(function (error) {
             console.log('mediaDevice.getUserMedia() error:', error);
             return;
@@ -63,16 +69,15 @@ $(function(){
                 console.log('set local screen: ' + stream.getTracks());
                 manager.addStream(stream);
                 ownPeerConnection.addStream(manager.getStream());
+
         var videoStream = manager.getVideoStream();
         var screenStream = manager.getScreenStream();
-        var ownVideoDisplay = document.getElementById('ownMainDisplay');
-        var ownScreenDisplay = document.getElementById('ownSubDisplay');
-        ownVideoDisplay.srcObject = videoStream;
-        ownScreenDisplay.srcObject = screenStream;
+        ownMainDisplay[0].srcObject = videoStream;
+        ownSubDisplay[0].srcObject = screenStream;
 
         //TODO とりあえず
-        $('#ownMainDisplay').removeClass('d-none');
-        $('#ownSubDisplay').removeClass('d-none');
+        $ownMainDisplay.removeClass('d-none');
+        $ownSubDisplay.removeClass('d-none');
             },
             function(error) {
                 console.log('mediaDevice.getUserMedia() error:', error);
@@ -100,25 +105,43 @@ $(function(){
 
     socket.on('requestStreamOwnerOption', function (data) {
         console.log('socket on response stream option');
-        if(data.streamId === manager.getStream().id) {
+        if (data.streamId === manager.getStream().id) {
             socket.emit('responseStreamOwnerOption', manager.getOption());
         }
     })
 
-    socket.on('responseStreamOwnerOption', function (option) {
+    socket.on('responseStreamOwnerOption', handleRemoteStream);
+
+    function handleRemoteStream(option) {
         console.log('socket on response stream option');
         remoteMediaStreamManager.extendOption(option);
         var videoStream = remoteMediaStreamManager.getVideoStream();
         var screenStream = remoteMediaStreamManager.getScreenStream();
-        var videoDisplay = document.getElementById('subDisplay');
-        var screenDisplay = document.getElementById('mainDisplay');
-        videoDisplay.srcObject = videoStream;
-        screenDisplay.srcObject = screenStream;
 
-        //TODO とりあえず
-        $('#subDisplay').removeClass('d-none');
-        $('#mainDisplay').removeClass('d-none');
-    });
+        if (!!videoStream && !!screenStream) {
+            if(!option.video) {
+                $remoteSubDisplay.addClass('soundonly');
+            } else {
+                $remoteSubDisplay.removeClass('soundonly');
+            }
+
+            $remoteMainDisplay[0].srcObject = screenStream;
+            $remoteSubDisplay[0].srcObject = videoStream;
+            $remoteMainDisplay.removeClass('d-none');
+            $remoteSubDisplay.removeClass('d-none');
+        } else if (!!videoStream) {
+            if(!option.video) {
+                $remoteMainDisplay.addClass('soundonly');
+            } else {
+                $remoteMainDisplay.removeClass('soundonly');
+            }
+            $remoteMainDisplay[0].srcObject = videoStream;
+            $remoteMainDisplay.removeClass('d-none');
+        } else if (!!screenStream) {
+            $remoteMainDisplay[0].srcObject = screenStream;
+            $remoteMainDisplay.removeClass('d-none');
+        }
+    }
 
 
     function handleVideoCaller() {

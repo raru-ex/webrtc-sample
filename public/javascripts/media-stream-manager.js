@@ -74,15 +74,17 @@ raru.Media.MediaStreamManager = (function () {
          */
         proto.getScreenStream = function () {
             var screenTrack = self.getTrack(self.SCREEN);
-            var audioTrack = self.getTrack(self.AUDIO);
+            // var audioTrack = self.getTrack(self.AUDIO);
             var mediaStream = new MediaStream();
 
             if(!!screenTrack) {
                 mediaStream.addTrack(screenTrack);
             }
+            /*
             if(!!audioTrack) {
                 mediaStream.addTrack(audioTrack);
             }
+            */
 
             if(0 < mediaStream.getTracks().length) {
                 console.log('get screen stream: ' + mediaStream);

@@ -21,8 +21,8 @@ block content
             span(class='glyphicon glyphicon-comment') 相手の名前
             div(class='btn-group pull-right')
         div(class='display')
-          video(id='mainDisplay', class='remoteMain d-none', autoplay)
-          video(id='subDisplay', class='remoteSub d-none', autoplay)
+          video(id='remoteMainDisplay', class='remoteMain d-none', autoplay)
+          video(id='remoteSubDisplay', class='remoteSub d-none', autoplay)
 
       div(class='col-md-4')
         div(class='bg-primary text-white')
@@ -38,8 +38,8 @@ block content
               button(id='voiceCall', class='pointer btn btn-default btn-circle ml-2')
                 i(class='fa fa-phone fa-lg', aria-hidden='true')
         div(class='display')
-          video(id='ownMainDisplay', class='ownMain d-none', autoplay)
-          video(id='ownSubDisplay', class='ownSub d-none', autoplay)
+          video(id='ownMainDisplay', class='ownMain d-none', autoplay, muted)
+          video(id='ownSubDisplay', class='ownSub d-none', autoplay, muted)
 
     div(id='chatArea', class='chat-container')
       div(class='header')
