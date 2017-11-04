@@ -1,10 +1,11 @@
 $(function(){
-    var socket = getSocket();
+    var Common = raru.Common;
+    var socket = Common.getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
     var remoteMediaStreamManager = null;
     var manager = new raru.Media.MediaStreamManager();
 
-    init($('#name').text(), $('#room').text());
+    init();
 
     $('#videoCall').on('click', getDeviceMedia({
         video: true,
@@ -131,14 +132,7 @@ $(function(){
     /**
      * 初期化
      */
-    function init(name, room) {
+    function init() {
         ownPeerConnection.setOnAddStream(requestStreamOwnerOption);
-        socket.emit('join', {
-            name: name,
-            roomName: room
-        });
     }
-
-    $('#submit').on('click', function() {
-    });
 });

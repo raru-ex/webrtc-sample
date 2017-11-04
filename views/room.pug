@@ -12,7 +12,7 @@ block stylesheet
 
 block content
   nav(class='navbar navbar-expand-md navbar-dark bg-dark fixed-top')
-   a(class='navbar-brand', href='#') #{roomName}
+   a(id='roomName', class='navbar-brand', href='#') #{roomName}
   main(role='main', class='container')
     div(id='videoArea', class='row')
       div(class='col-md-8')
@@ -27,7 +27,7 @@ block content
       div(class='col-md-4')
         div(class='bg-primary text-white')
           div(class='card-header')
-            span(class='glyphicon glyphicon-comment') #{name}
+            span(id='userName', class='glyphicon glyphicon-comment') #{name}
             div(class='pull-right')
               button(id='videoCall', class='pointer btn btn-default btn-circle')
                 i(class='fa fa-video-camera fa-lg', aria-hidden='true')
@@ -40,19 +40,11 @@ block content
     div(id='chatArea', class='chat-container')
       div(class='header')
         span(class='ml-2') Messages
-      div(class='col-md-12 chat-body')
+      div(id='chatBody', class='col-md-12 chat-body')
         ul(id='chat', class='chat')
-          li(class='message')
-            div(class='message-body')
-              div(class='chat-header')
-                span(class='name font-weight-bold') テスト太郎
-                small(class='text-muted pull-right')
-                  span(class='posted-time') 11月04日 12:32
-              p ほげほげ
-              p ふがふが
       div(class='col-md-12 chat-input')
         div(class='input-header')
-          button(class='btn-primary btn-sm pull-right') 送信
+          button(id='send', class='btn-primary btn-sm pull-right') 送信
         div
           textarea(name='message', placeholder='ここにメッセージ内容を入力 (Shift + Enterキーで送信)')
 
