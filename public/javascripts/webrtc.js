@@ -2,8 +2,8 @@ $(function(){
     var Common = raru.Common;
     var socket = Common.getSocket();
     var ownPeerConnection = new raru.SocketIO.MyRTCPeerConnection(socket);
-    var remoteMediaStreamManager = null;
-    var manager = new raru.Media.MediaStreamManager();
+    var remoteManager = raru.Media.RemoteMediaStreamManager;
+    var manager = raru.Media.MediaStreamManager;
     var $videoCaller = $('#videoCall');
     var $voiceCaller = $('#voiceCall');
     var $screenCaller = $('#screenCall');
@@ -11,6 +11,8 @@ $(function(){
     var $ownSubDisplay = $('#ownSubDisplay');
     var $remoteMainDisplay = $('#remoteMainDisplay');
     var $remoteSubDisplay = $('#remoteSubDisplay');
+    var localStream = null;
+    var remoteStream = null;
 
     init();
     $videoCaller.on('click', handleVideoCaller);
@@ -27,9 +29,9 @@ $(function(){
         navigator.mediaDevices.getUserMedia(option)
         .then(function (stream) {
             console.log('set local video: ' + stream.getTracks());
-            $ownMainDisplay[0].srcObject = stream;
-            manager.addStream(stream);
-            ownPeerConnection.addStream(manager.getStream());
+            localStream = stream;
+            $ownMainDisplay[0].srcObject = localStream;
+            ownPeerConnection.addStream(localStream);
             if (option.video) {
                 activateIcon($videoCaller);
                 $ownMainDisplay.removeClass('soundonly');
@@ -94,7 +96,7 @@ $(function(){
      */
 
     function requestStreamOwnerOption (evt) {
-        remoteMediaStreamManager = new raru.Media.RemoteMediaStreamManager(evt.stream);
+        remoteStream = evt.stream
 
         console.log('request stream option');
         socket.emit('requestStreamOwnerOption', {
@@ -105,8 +107,8 @@ $(function(){
 
     socket.on('requestStreamOwnerOption', function (data) {
         console.log('socket on response stream option');
-        if (data.streamId === manager.getStream().id) {
-            socket.emit('responseStreamOwnerOption', manager.getOption());
+        if (data.streamId === localStream.id) {
+            socket.emit('responseStreamOwnerOption', manager.getOption(localStream));
         }
     })
 
@@ -114,9 +116,8 @@ $(function(){
 
     function handleRemoteStream(option) {
         console.log('socket on response stream option');
-        remoteMediaStreamManager.extendOption(option);
-        var videoStream = remoteMediaStreamManager.getVideoStream();
-        var screenStream = remoteMediaStreamManager.getScreenStream();
+        var videoStream = remoteManager.getVideoStream(remoteStream, option);
+        var screenStream = remoteManager.getScreenStream(remoteStream, option);
 
         if (!!videoStream && !!screenStream) {
             if(!option.video) {
@@ -163,6 +164,10 @@ $(function(){
             });
         } else {
             // TODO remote stream
+            ownPeerConnection.removeStream(localStream);
+            localStream.getTracks().forEach(track => {
+                localStream.removeTrack(track);
+            });
         }
     }
 
