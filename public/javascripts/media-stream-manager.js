@@ -164,6 +164,12 @@ raru.Media.MediaStreamManager = (function () {
             self._stopStream('sreen');
         }
 
+        proto.removeAllTrack = function () {
+            self.stream.getTracks().forEach(track => {
+                self.stream.removeTrack(track);
+            });
+        }
+
         /**
          * カメラの映像を削除します。
          */
@@ -237,15 +243,9 @@ raru.Media.MediaStreamManager = (function () {
          */
         proto.extendOption = function (option) {
             if (Common.isInitialized(option)) {
-                if (!!option.audio) {
-                    self.audioTrackId = option.audio.id;
-                }
-                if (!!option.video) {
-                    self.videoTrackId = option.video.id;
-                }
-                if (!!option.screen) {
-                    self.screenTrackId = option.screen.id;
-                }
+                self.audioTrackId = !!option.audio ? option.audio.id : null;
+                self.videoTrackId = !!option.video ? option.video.id : null;
+                self.screenTrackId = !!option.screen ? option.screen.id : null;
             }
         }
         //----------- private methods ------------//
@@ -363,8 +363,8 @@ raru.Media.MediaStreamManager = (function () {
                 self.stream = inputStream;
             } else {
                 self.stream = new MediaStream();
-                self.addStream(inputStream);
             }
+             self.addStream(inputStream);
         }
 
         self._init(stream, option);
